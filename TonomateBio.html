@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tonomate Bio – Gustări sănătoase în școala ta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+  :root {
+    --green-dark: #1a3a1f;
+    --green-mid: #2d5a34;
+    --green-accent: #4a8c54;
+    --green-light: #a8d5a2;
+    --green-pale: #e8f5e3;
+    --cream: #f9f5ec;
+    --cream-dark: #ede8dc;
+    --brown: #5c4a2a;
+    --text-dark: #1a2a1c;
+    --text-mid: #3d5242;
+    --text-light: #6e8a72;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(26,58,31,0.10);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(249,245,236,0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--cream-dark);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--green-dark);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--green-accent); }
+  .nav-links { display: flex; gap: 0.2rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-mid);
+    font-size: 0.9rem;
+    font-weight: 400;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-links a:hover { background: var(--green-pale); color: var(--green-dark); }
+  .nav-cta {
+    background: var(--green-dark) !important;
+    color: var(--white) !important;
+    font-weight: 500 !important;
+    padding: 0.4rem 1rem !important;
+  }
+  .nav-cta:hover { background: var(--green-mid) !important; }
+
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--green-dark); border-radius: 2px; transition: all 0.3s; }
+
+  /* ─── SECTIONS BASE ─── */
+  section { padding: 100px 2rem 80px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-accent);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.6rem, 5vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--green-dark);
+    letter-spacing: -1px;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 600;
+    color: var(--green-dark);
+    letter-spacing: -0.5px;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+  p { color: var(--text-mid); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s;
+  }
+  .btn-primary {
+    background: var(--green-dark);
+    color: var(--white);
+  }
+  .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--green-dark);
+    border: 1.5px solid var(--green-dark);
+  }
+  .btn-outline:hover { background: var(--green-pale); }
+  .btn-white {
+    background: var(--white);
+    color: var(--green-dark);
+  }
+  .btn-white:hover { background: var(--cream); transform: translateY(-1px); }
+
+  /* ─── HOME / HERO ─── */
+  #home {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    background: linear-gradient(160deg, #1a3a1f 0%, #2d5a34 55%, #3d7044 100%);
+    padding-top: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  #home::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 70% 50%, rgba(168,213,162,0.12) 0%, transparent 60%),
+      radial-gradient(circle at 20% 80%, rgba(74,140,84,0.18) 0%, transparent 50%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(168,213,162,0.15);
+    border: 1px solid rgba(168,213,162,0.35);
+    color: var(--green-light);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    margin-bottom: 1.5rem;
+  }
+  #home h1 { color: var(--white); margin-bottom: 1.25rem; }
+  .hero-sub { font-size: 1.15rem; color: rgba(232,245,227,0.85); margin-bottom: 2.5rem; max-width: 520px; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .hero-stats {
+    margin-top: 4rem;
+    display: flex; gap: 2.5rem; flex-wrap: wrap;
+  }
+  .hero-stat-val {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+  .hero-stat-lbl { font-size: 0.82rem; color: rgba(232,245,227,0.7); margin-top: 0.3rem; }
+
+  /* ─── PROBLEM / SOLUTION ─── */
+  #home-problem { background: var(--cream); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .problem-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid var(--cream-dark);
+  }
+  .problem-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .solution-visual {
+    background: var(--green-pale);
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid rgba(74,140,84,0.2);
+  }
+  .benefit-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+  .benefit-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--green-accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+  .benefit-text h4 { font-size: 0.95rem; font-weight: 500; color: var(--green-dark); margin-bottom: 0.2rem; }
+  .benefit-text p { font-size: 0.85rem; }
+
+  /* ─── HOW IT WORKS ─── */
+  #how-it-works { background: var(--green-dark); }
+  #how-it-works .section-label { color: var(--green-light); }
+  #how-it-works h2 { color: var(--white); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; }
+  .step-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(168,213,162,0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .step-number {
+    font-family: 'Fraunces', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: rgba(168,213,162,0.2);
+    position: absolute;
+    top: -0.5rem; right: 1rem;
+    line-height: 1;
+  }
+  .step-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .step-card h3 { color: var(--white); margin-bottom: 0.5rem; font-size: 1.1rem; }
+  .step-card p { color: rgba(232,245,227,0.7); font-size: 0.9rem; }
+
+  /* ─── HOME CTA ─── */
+  #home-cta {
+    background: var(--green-pale);
+    text-align: center;
+    border-top: 1px solid rgba(74,140,84,0.15);
+    border-bottom: 1px solid rgba(74,140,84,0.15);
+  }
+  #home-cta h2 { margin-bottom: 1rem; }
+  #home-cta p { max-width: 500px; margin: 0 auto 2rem; }
+
+  /* ─── DESPRE NOI ─── */
+  #despre { background: var(--white); }
+  .despre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .despre-text h2 { margin-bottom: 1.5rem; }
+  .despre-text p { margin-bottom: 1rem; }
+  .despre-cards { display: flex; flex-direction: column; gap: 1.25rem; }
+  .despre-card {
+    background: var(--green-pale);
+    border-radius: 16px;
+    padding: 1.75rem;
+    border-left: 4px solid var(--green-accent);
+  }
+  .despre-card h3 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--green-accent); text-transform: uppercase; letter-spacing: 1px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .despre-card p { font-size: 0.95rem; }
+
+  /* ─── PRODUSE ─── */
+  #produse { background: var(--cream); }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .product-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--cream-dark);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .product-img {
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem;
+    background: var(--green-pale);
+  }
+  .product-body { padding: 1.25rem; }
+  .product-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .tag {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 50px;
+  }
+  .tag-bio { background: #e8f5e3; color: #2d5a34; }
+  .tag-vegan { background: #fff3e0; color: #8b5a00; }
+  .tag-sugar { background: #fce4ec; color: #880e4f; }
+  .tag-protein { background: #e3f2fd; color: #0d47a1; }
+  .tag-raw { background: #f3e5f5; color: #4a148c; }
+  .product-name { font-weight: 600; color: var(--green-dark); margin-bottom: 0.35rem; font-size: 1rem; }
+  .product-desc { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.75rem; line-height: 1.5; }
+  .product-footer { display: flex; justify-content: space-between; align-items: center; }
+  .product-price { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 700; color: var(--green-accent); }
+  .product-rating { display: flex; gap: 2px; }
+  .star { cursor: pointer; font-size: 1rem; color: #ccc; transition: color 0.15s; }
+  .star.active, .star:hover, .star:hover ~ .star { color: #f4c542; }
+  .product-rating:hover .star { color: #f4c542; }
+
+  /* ─── PREȚURI ─── */
+  #preturi { background: var(--white); }
+  .prices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .price-card {
+    background: var(--cream);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid var(--cream-dark);
+    text-align: center;
+    transition: transform 0.25s;
+  }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-card.featured {
+    background: var(--green-dark);
+    border-color: var(--green-dark);
+  }
+  .price-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .price-card h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+  .price-card.featured h3 { color: var(--white); }
+  .price-range {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--green-accent);
+    margin-bottom: 0.5rem;
+  }
+  .price-card.featured .price-range { color: var(--green-light); }
+  .price-desc { font-size: 0.85rem; color: var(--text-light); }
+  .price-card.featured .price-desc { color: rgba(232,245,227,0.7); }
+  .price-items { list-style: none; margin-top: 1rem; }
+  .price-items li { font-size: 0.82rem; padding: 0.3rem 0; color: var(--text-mid); border-bottom: 1px solid var(--cream-dark); }
+  .price-card.featured .price-items li { color: rgba(232,245,227,0.8); border-color: rgba(168,213,162,0.2); }
+
+  /* ─── LOCAȚII ─── */
+  #locatii { background: var(--cream); }
+  #map-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--cream-dark);
+    margin-top: 2rem;
+    background: #e8f0e4;
+    box-shadow: var(--shadow);
+  }
+  #leaflet-map {
+    width: 100%;
+    height: 520px;
+    border-radius: 20px;
+    z-index: 1;
+  }
+  /* Custom marker pin */
+  .custom-pin {
+    background: transparent;
+    border: none;
+  }
+  .custom-pin-wrap {
+    position: relative;
+    width: 36px;
+    height: 46px;
+    cursor: pointer;
+    transition: transform 0.18s ease;
+  }
+  .custom-pin-wrap:hover { transform: scale(1.15); transform-origin: 50% 100%; }
+  .custom-pin-circle {
+    width: 36px; height: 36px;
+    background: var(--green-dark);
+    border: 3px solid var(--green-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(26,58,31,0.35);
+    color: white;
+    font-size: 16px;
+  }
+  .custom-pin-tail {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 11px solid var(--green-dark);
+  }
+  /* Leaflet popup styling override */
+  .leaflet-popup-content-wrapper {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(26,58,31,0.18);
+    border: 1px solid var(--cream-dark);
+  }
+  .leaflet-popup-content {
+    margin: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.5;
+  }
+  .leaflet-popup-content h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--green-dark);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .leaflet-popup-content p {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    margin: 3px 0;
+  }
+  .leaflet-popup-tip { background: var(--white); }
+  .leaflet-container a.leaflet-popup-close-button {
+    color: var(--text-light);
+    padding: 6px 8px 0 0;
+  }
+  .leaflet-container { font-family: 'DM Sans', sans-serif; }
+  .locations-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .location-item {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 1.25rem;
+    border: 1px solid var(--cream-dark);
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .location-pin {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--green-accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+  .location-item h4 { font-size: 0.95rem; font-weight: 600; color: var(--green-dark); margin-bottom: 0.25rem; }
+  .location-item p { font-size: 0.82rem; color: var(--text-light); }
+
+  /* ─── PARTENERIATE ─── */
+  #parteneriate { background: var(--green-dark); }
+  #parteneriate .section-label { color: var(--green-light); }
+  #parteneriate h2 { color: var(--white); margin-bottom: 1rem; }
+  #parteneriate > .container > p { color: rgba(232,245,227,0.8); max-width: 600px; margin-bottom: 3rem; }
+  .benefits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+  .benefit-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(168,213,162,0.2);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+  .benefit-card-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .benefit-card h3 { color: var(--white); margin-bottom: 0.5rem; font-size: 1.05rem; }
+  .benefit-card p { color: rgba(232,245,227,0.7); font-size: 0.88rem; }
+  .partner-cta { text-align: center; background: rgba(255,255,255,0.07); border-radius: 20px; padding: 3rem 2rem; border: 1px solid rgba(168,213,162,0.2); }
+  .partner-cta h3 { color: var(--white); font-size: 1.5rem; margin-bottom: 1rem; }
+  .partner-cta p { color: rgba(232,245,227,0.8); margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+  /* ─── PARTNERIATE FORMULAR ─── */
+  .partner-form {
+    max-width: 600px;
+    margin: 2rem auto 0;
+    text-align: left;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.85rem; color: rgba(232,245,227,0.8); margin-bottom: 0.4rem; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(168,213,162,0.3);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(232,245,227,0.4); }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--green-light); }
+  .form-group.full { grid-column: 1 / -1; }
+  .partner-form .form-group select option { background: var(--green-dark); }
+
+  /* ─── CONTACT ─── */
+  #contact { background: var(--white); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .contact-info h2 { margin-bottom: 1rem; }
+  .contact-info p { margin-bottom: 2rem; }
+  .contact-detail { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .contact-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--green-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .contact-detail h4 { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.1rem; font-weight: 400; }
+  .contact-detail p { font-size: 0.95rem; color: var(--text-dark); font-weight: 500; margin: 0; }
+  .contact-form-wrap { background: var(--cream); border-radius: 24px; padding: 2.5rem; }
+  .contact-form-wrap .form-group label { color: var(--text-mid); }
+  .contact-form-wrap input, .contact-form-wrap textarea {
+    width: 100%;
+    background: var(--white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .contact-form-wrap input:focus, .contact-form-wrap textarea:focus { border-color: var(--green-accent); }
+  .success-msg { display: none; background: var(--green-pale); border: 1px solid var(--green-accent); border-radius: 10px; padding: 1rem; text-align: center; color: var(--green-dark); font-size: 0.9rem; margin-top: 1rem; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--green-dark);
+    color: rgba(232,245,227,0.7);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+  .footer-logo span { color: var(--green-light); }
+  footer p { font-size: 0.85rem; margin-bottom: 0.4rem; }
+  .footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin: 1.5rem 0; }
+  .footer-links a { color: rgba(232,245,227,0.6); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--green-light); }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: var(--cream); padding: 1rem 2rem 1.5rem; border-bottom: 1px solid var(--cream-dark); }
+    .hamburger { display: flex; }
+    nav { position: relative; }
+    section { padding: 60px 1.25rem; }
+    .two-col, .despre-grid, .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .steps { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1.5rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 2.4rem; }
+    #home { min-height: auto; padding: 120px 1.25rem 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#home" class="nav-logo">Tonomate<span>Bio</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#despre">Despre noi</a></li>
+    <li><a href="#produse">Produse</a></li>
+    <li><a href="#preturi">Prețuri</a></li>
+    <li><a href="#locatii">Locații</a></li>
+    <li><a href="#parteneriate">Parteneriate</a></li>
+    <li><a href="#contact" class="nav-cta">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HOME -->
+<section id="home">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">🌿 100% natural · Bio certificat</div>
+      <h1>Gustări sănătoase, direct în școala ta</h1>
+      <p class="hero-sub">Tonomate inteligente cu produse bio pentru elevi. Acces rapid la snack-uri naturale, fără aditivi, fără compromisuri.</p>
+      <div class="hero-btns">
+        <a href="#locatii" class="btn btn-white">📍 Vezi locațiile</a>
+        <a href="#parteneriate" class="btn btn-outline" style="color:var(--green-light);border-color:var(--green-light);">Parteneriază cu noi</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-val" id="stat-scoli">8</div>
+          <div class="hero-stat-lbl">Școli partenere</div>
+        </div>
+        <div>
+          <div class="hero-stat-val">30+</div>
+          <div class="hero-stat-lbl">Produse disponibile</div>
+        </div>
+        <div>
+          <div class="hero-stat-val">100%</div>
+          <div class="hero-stat-lbl">Produse bio certificate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMĂ & SOLUȚIE -->
+<section id="home-problem">
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <div class="section-label">Problema</div>
+        <h2 style="margin-bottom:1.5rem;">Elevii merită mai mult decât chipsuri și suc</h2>
+        <div class="problem-card">
+          <div class="problem-icon">⚠️</div>
+          <p style="margin-bottom:1rem;">Majoritatea automatelor din școli oferă produse ultra-procesate, bogate în zahăr, coloranți artificiali și conservanți.</p>
+          <p>Consecințele sunt vizibile: oboseală, lipsă de concentrare și obiceiuri alimentare nesănătoase formate din adolescență.</p>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Soluția noastră</div>
+        <h2 style="margin-bottom:1.5rem;">Tonomate bio, gândite pentru școli</h2>
+        <div class="solution-visual">
+          <div class="benefit-item">
+            <div class="benefit-icon">🥦</div>
+            <div class="benefit-text">
+              <h4>Produse 100% bio</h4>
+              <p>Toate produsele sunt certificate organic, fără aditivi artificiali</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">💳</div>
+            <div class="benefit-text">
+              <h4>Plată simplă</h4>
+              <p>Card, telefon sau numerar – rapid și ușor de folosit</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">🌡️</div>
+            <div class="benefit-text">
+              <h4>Temperatură controlată</h4>
+              <p>Snack-uri proaspete și băuturi răcite, mereu disponibile</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">📊</div>
+            <div class="benefit-text">
+              <h4>Stoc actualizat în timp real</h4>
+              <p>Reaprovizionare automată înainte ca produsele să se epuizeze</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CUM FUNCȚIONEAZĂ -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-label">Cum funcționează</div>
+    <h2>Trei pași simpli</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <div class="step-icon">👆</div>
+        <h3>Alegi produsul</h3>
+        <p>Răsfoiești produsele disponibile pe ecranul tactil al automatului și selectezi ce îți dorești.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <div class="step-icon">💳</div>
+        <h3>Plătești</h3>
+        <p>Plătești simplu cu cardul, telefonul sau cash. Totul rapid, în câteva secunde.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <div class="step-icon">🎉</div>
+        <h3>Ridici produsul</h3>
+        <p>Automatul eliberează produsul și ești gata să savurezi o gustare sănătoasă!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOME CTA -->
+<section id="home-cta">
+  <div class="container">
+    <div class="section-label">Acțiune</div>
+    <h2>Vrei un tonomat în școala ta?</h2>
+    <p>Instalare gratuită, fără costuri ascunse. Contactează-ne și configurăm împreună soluția potrivită pentru elevii vostri.</p>
+    <a href="#contact" class="btn btn-primary">Contactează-ne acum ↗</a>
+  </div>
+</section>
+
+<!-- DESPRE NOI -->
+<section id="despre">
+  <div class="container">
+    <div class="despre-grid">
+      <div class="despre-text">
+        <div class="section-label">Povestea noastră</div>
+        <h2 style="margin-bottom:1.5rem;">De ce am creat TonomateBio?</h2>
+        <p>Totul a pornit dintr-o observație simplă: în școlile din București, elevii nu aveau acces la opțiuni alimentare sănătoase în pauze. Automatele existente ofereau doar produse pline de zahăr și aditivi.</p>
+        <p style="margin-top:1rem;">Ne-am propus să schimbăm asta – treptat, școală cu școală. TonomateBio este un proiect antreprenorial cu suflet, construit de oameni care cred că o gustare bună poate face diferența în ziua unui elev.</p>
+        <p style="margin-top:1rem;">Colaborăm direct cu producători bio locali și europeni pentru a aduce în tonomate produse cu adevărat naturale, gustoase și accesibile ca preț.</p>
+      </div>
+      <div class="despre-cards">
+        <div class="despre-card">
+          <h3>Misiunea noastră</h3>
+          <p>Să oferim elevilor din România acces la gustări sănătoase, bio și delicioase – direct în școala lor, la orice oră din zi.</p>
+        </div>
+        <div class="despre-card">
+          <h3>Viziunea noastră</h3>
+          <p>O Românie în care fiecare copil are lângă el o alternativă sănătoasă. Vrem să extindem rețeaua la 100+ școli până în 2027.</p>
+        </div>
+        <div class="despre-card">
+          <h3>Valorile noastre</h3>
+          <p>Transparență în ingrediente, respect față de natură, parteneriate corecte cu producătorii și prețuri accesibile pentru toți elevii.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUSE -->
+<section id="produse">
+  <div class="container">
+    <div class="section-label">Catalog</div>
+    <h2>Produsele noastre</h2>
+    <p style="margin-top:0.75rem; max-width:540px;">Selecție atentă de snack-uri bio, băuturi naturale și smoothie-uri. Toate certificate organic.</p>
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+</section>
+
+<!-- PREȚURI -->
+<section id="preturi">
+  <div class="container">
+    <div class="section-label">Transparență</div>
+    <h2>Prețuri accesibile</h2>
+    <p style="margin-top:0.75rem; max-width:540px;">Prețuri corecte pentru produse de calitate. Fără surprize, fără comisioane ascunse.</p>
+    <div class="prices-grid">
+      <div class="price-card">
+        <div class="price-icon">🥜</div>
+        <h3>Snack-uri</h3>
+        <div class="price-range">5–8 lei</div>
+        <p class="price-desc">Mix-uri de nuci, batoane bio, biscuiți din fulgi de ovăz</p>
+        <ul class="price-items">
+          <li>Baton proteic bio – 7 lei</li>
+          <li>Mix nuci & fructe – 6 lei</li>
+          <li>Biscuiți ovăz – 5 lei</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <div class="price-icon">🥤</div>
+        <h3>Smoothie-uri</h3>
+        <div class="price-range">8–12 lei</div>
+        <p class="price-desc">Presate la rece, fără zahăr adăugat, cu fructe bio</p>
+        <ul class="price-items">
+          <li>Smoothie verde – 10 lei</li>
+          <li>Berry blend – 11 lei</li>
+          <li>Mango & turmeric – 12 lei</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="price-icon">💧</div>
+        <h3>Băuturi naturale</h3>
+        <div class="price-range">6–10 lei</div>
+        <p class="price-desc">Sucuri naturale, ape infuzate, ceaiuri reci bio</p>
+        <ul class="price-items">
+          <li>Suc natural mere – 6 lei</li>
+          <li>Apă infuzată citrice – 7 lei</li>
+          <li>Ceai rece bio – 8 lei</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="price-icon">🍫</div>
+        <h3>Dulciuri bio</h3>
+        <div class="price-range">6–9 lei</div>
+        <p class="price-desc">Ciocolată neagră bio, date caramel, trufe raw</p>
+        <ul class="price-items">
+          <li>Ciocolată neagră 85% – 8 lei</li>
+          <li>Bomboane date – 7 lei</li>
+          <li>Trufă raw cacao – 6 lei</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCAȚII -->
+<section id="locatii">
+  <div class="container">
+    <div class="section-label">Rețeaua noastră</div>
+    <h2>Unde ne găsești</h2>
+    <p style="margin-top:0.75rem; max-width:540px;">Tonomate instalate în școli din sectoarele 1–6 ale Bucureștiului. Click pe un pin pentru detalii.</p>
+    <div id="map-wrap">
+      <div id="leaflet-map"></div>
+    </div>
+    <div class="locations-list" id="locationsList"></div>
+  </div>
+</section>
+
+<!-- PARTENERIATE -->
+<section id="parteneriate">
+  <div class="container">
+    <div class="section-label">Colaborare</div>
+    <h2>Parteneriază cu noi</h2>
+    <p>Alătură-te școlilor care au ales să ofere elevilor o alternativă sănătoasă. Procesul este simplu, iar beneficiile sunt imediate.</p>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-card-icon">🚀</div>
+        <h3>Instalare gratuită</h3>
+        <p>Instalăm și întreținem tonomatul fără niciun cost pentru școală. Zero investiție din partea voastră.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-card-icon">🌿</div>
+        <h3>Produse sănătoase</h3>
+        <p>Elevii au acces la snack-uri bio, certificat organic, fără aditivi sau conservanți artificiali.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-card-icon">🏫</div>
+        <h3>Imagine modernă</h3>
+        <p>Școala ta devine un exemplu de responsabilitate față de sănătatea elevilor și alimentație echilibrată.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-card-icon">🤝</div>
+        <h3>Suport continuu</h3>
+        <p>Reaprovizionare săptămânală, mentenanță tehnică inclusă și un manager de cont dedicat.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-card-icon">📈</div>
+        <h3>Comision pentru școală</h3>
+        <p>Școala primește un procent din vânzări, care poate fi direcționat către activități extracurriculare.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-card-icon">📊</div>
+        <h3>Rapoarte lunare</h3>
+        <p>Transparență totală: rapoarte de vânzări, produse preferate și feedback din partea elevilor.</p>
+      </div>
+    </div>
+    <div class="partner-cta">
+      <h3>Aplică pentru colaborare</h3>
+      <p>Completează formularul și te contactăm în maxim 48 de ore pentru a discuta detaliile.</p>
+      <form class="partner-form" onsubmit="submitPartner(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Numele școlii *</label>
+            <input type="text" placeholder="ex: Liceul Teoretic nr. 1" required>
+          </div>
+          <div class="form-group">
+            <label>Persoana de contact *</label>
+            <input type="text" placeholder="Nume și prenume" required>
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" placeholder="contact@scoala.ro" required>
+          </div>
+          <div class="form-group">
+            <label>Telefon</label>
+            <input type="tel" placeholder="07XX XXX XXX">
+          </div>
+          <div class="form-group">
+            <label>Sector București</label>
+            <select>
+              <option>Sector 1</option><option>Sector 2</option><option>Sector 3</option>
+              <option>Sector 4</option><option>Sector 5</option><option>Sector 6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nr. estimat de elevi</label>
+            <input type="number" placeholder="ex: 800">
+          </div>
+          <div class="form-group full">
+            <label>Mesaj (opțional)</label>
+            <textarea rows="3" placeholder="Orice informație suplimentară..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-white" style="width:100%;justify-content:center;">Trimite aplicația ↗</button>
+        <div id="partnerSuccess" class="success-msg" style="background:rgba(168,213,162,0.15);border-color:rgba(168,213,162,0.4);color:var(--green-light);">✅ Mulțumim! Te contactăm în curând.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="section-label">Hai să vorbim</div>
+        <h2>Contact</h2>
+        <p>Ai întrebări despre tonomate, produse sau parteneriate? Suntem bucuroși să ajutăm.</p>
+        <div class="contact-detail">
+          <div class="contact-icon">📧</div>
+          <div>
+            <h4>Email</h4>
+            <p>contact@tonomatebio.ro</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-icon">📞</div>
+          <div>
+            <h4>Telefon</h4>
+            <p>+40 721 234 567</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h4>Sediu</h4>
+            <p>București, Sector 1</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-icon">🕐</div>
+          <div>
+            <h4>Program</h4>
+            <p>Luni–Vineri, 09:00–18:00</p>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form-wrap">
+        <h3 style="margin-bottom:1.5rem;">Trimite un mesaj</h3>
+        <form onsubmit="submitContact(event)">
+          <div class="form-group">
+            <label style="color:var(--text-mid);font-size:0.85rem;display:block;margin-bottom:0.4rem;">Nume *</label>
+            <input type="text" placeholder="Numele tău" required>
+          </div>
+          <div class="form-group">
+            <label style="color:var(--text-mid);font-size:0.85rem;display:block;margin-bottom:0.4rem;">Email *</label>
+            <input type="email" placeholder="email@exemplu.ro" required>
+          </div>
+          <div class="form-group">
+            <label style="color:var(--text-mid);font-size:0.85rem;display:block;margin-bottom:0.4rem;">Mesaj *</label>
+            <textarea rows="5" placeholder="Cum te putem ajuta?" required style="width:100%;background:var(--white);border:1px solid var(--cream-dark);border-radius:10px;padding:0.75rem 1rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text-dark);outline:none;resize:vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Trimite mesajul ↗</button>
+          <div id="contactSuccess" class="success-msg">✅ Mesaj trimis! Te contactăm în curând.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Tonomate<span>Bio</span></div>
+  <p>Gustări sănătoase, direct în școala ta.</p>
+  <div class="footer-links">
+    <a href="#home">Acasă</a>
+    <a href="#despre">Despre noi</a>
+    <a href="#produse">Produse</a>
+    <a href="#preturi">Prețuri</a>
+    <a href="#locatii">Locații</a>
+    <a href="#parteneriate">Parteneriate</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <p>© 2025 TonomateBio. Toate drepturile rezervate.</p>
+</footer>
+
+<script>
+// ─── DATE PRODUSE ───
+const products = [
+  { name: "Baton proteic bio", desc: "Proteină din mazăre, dată caramel și cacao raw. Fără zahăr adăugat.", price: "7 lei", icon: "🍫", tags: ["bio","vegan","sugar"] },
+  { name: "Mix nuci & fructe", desc: "Amestec de nuci braziliene, migdale, caju și afine uscate bio.", price: "6 lei", icon: "🥜", tags: ["bio","vegan","raw"] },
+  { name: "Smoothie verde", desc: "Spanac, măr verde, ghimbir și lămâie. Presat la rece, nepasteurizat.", price: "10 lei", icon: "🥤", tags: ["bio","vegan","sugar"] },
+  { name: "Berry Smoothie", desc: "Căpșuni, zmeură și afine bio cu apă de cocos. Antioxidanți naturali.", price: "11 lei", icon: "🫐", tags: ["bio","vegan"] },
+  { name: "Biscuiți ovăz & miere", desc: "Din fulgi de ovăz integral bio, miere de salcâm și semințe de chia.", price: "5 lei", icon: "🍪", tags: ["bio"] },
+  { name: "Ciocolată neagră 85%", desc: "Cacao organic din Ecuador. Fără lapte, fără lecitină de soia.", price: "8 lei", icon: "🍫", tags: ["bio","vegan","sugar"] },
+  { name: "Suc natural de mere", desc: "Mere bio presate la rece, fără conservanți sau zahăr adăugat.", price: "6 lei", icon: "🍎", tags: ["bio","vegan","sugar"] },
+  { name: "Apă infuzată citrice", desc: "Apă de izvor cu portocale bio, grapefruit și mentă proaspătă.", price: "7 lei", icon: "💧", tags: ["bio","vegan","sugar"] },
+  { name: "Granola cu coacăze", desc: "Ovăz, miere, scorțișoară și coacăze uscate. Sursa de energie lentă.", price: "7 lei", icon: "🥣", tags: ["bio","vegan"] },
+  { name: "Trufe raw cacao", desc: "Din dată Medjool, cacao raw și cocos. Vegane, fără gluten.", price: "6 lei", icon: "🟤", tags: ["bio","vegan","raw","sugar"] },
+  { name: "Ceai rece piersică", desc: "Ceai verde bio cu piersică naturală. Îndulcit cu stevia.", price: "8 lei", icon: "🍑", tags: ["bio","vegan","sugar"] },
+  { name: "Baton proteic vanilie", desc: "Proteică vegetală, aromă naturală de vanilie bourbon și ulei de cocos.", price: "8 lei", icon: "🌿", tags: ["bio","vegan","protein"] },
+];
+
+const tagLabels = { bio: "BIO", vegan: "VEGAN", sugar: "FĂRĂ ZAHĂR", raw: "RAW", protein: "PROTEIC" };
+const tagClass = { bio:"tag-bio", vegan:"tag-vegan", sugar:"tag-sugar", raw:"tag-raw", protein:"tag-protein" };
+
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML = products.map((p, i) => `
+    <div class="product-card">
+      <div class="product-img">${p.icon}</div>
+      <div class="product-body">
+        <div class="product-tags">${p.tags.map(t=>`<span class="tag ${tagClass[t]}">${tagLabels[t]}</span>`).join('')}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-footer">
+          <div class="product-price">${p.price}</div>
+          <div class="product-rating" data-product="${i}">
+            ${[1,2,3,4,5].map(s=>`<span class="star" data-star="${s}" onclick="rateProduct(${i},${s})">★</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+const ratings = {};
+function rateProduct(productIdx, star) {
+  ratings[productIdx] = star;
+  const container = document.querySelector(`.product-rating[data-product="${productIdx}"]`);
+  container.querySelectorAll('.star').forEach((el, i) => {
+    el.classList.toggle('active', i < star);
+  });
+}
+renderProducts();
+
+// ─── DATE LOCAȚII ───
+const locations = [
+  { name: "Colegiul Național „Sf. Sava”", lat: 44.4416, lng: 26.0908, program: "08:00 – 18:00", sector: "Sector 1", produse: "Snack-uri, Smoothie-uri, Băuturi" },
+  { name: "Liceul Teoretic „Lauder-Reut”", lat: 44.4294, lng: 26.1096, program: "08:00 – 17:00", sector: "Sector 3", produse: "Snack-uri, Dulciuri bio" },
+  { name: "Colegiul Național „I.L. Caragiale”", lat: 44.4585, lng: 26.0951, program: "08:00 – 18:30", sector: "Sector 1", produse: "Snack-uri, Băuturi naturale" },
+  { name: "Colegiul Național „Mihai Eminescu”", lat: 44.4258, lng: 26.0956, program: "08:00 – 17:30", sector: "Sector 4", produse: "Smoothie-uri, Snack-uri" },
+  { name: "Colegiul Național „Gheorghe Lazăr”", lat: 44.4348, lng: 26.0904, program: "08:00 – 18:00", sector: "Sector 5", produse: "Toate categoriile" },
+  { name: "Colegiul Național de Informatică „Tudor Vianu”", lat: 44.4581, lng: 26.0801, program: "08:00 – 17:00", sector: "Sector 1", produse: "Snack-uri, Băuturi" },
+  { name: "Colegiul Național „Cantemir Vodă”", lat: 44.4455, lng: 26.1128, program: "08:00 – 18:00", sector: "Sector 2", produse: "Snack-uri, Smoothie-uri" },
+  { name: "Liceul Teoretic „Nichita Stănescu”", lat: 44.4335, lng: 26.1696, program: "08:00 – 17:30", sector: "Sector 3", produse: "Dulciuri bio, Băuturi" },
+];
+
+// ─── HARTĂ LEAFLET ───
+let leafletMap = null;
+
+function initMap() {
+  // Centru pe București (între toate locațiile)
+  leafletMap = L.map('leaflet-map', {
+    center: [44.4396, 26.1063],
+    zoom: 12,
+    scrollWheelZoom: false, // evită scroll accidental – activat de utilizator la click
+    zoomControl: true,
+  });
+
+  // Reactivare scroll-zoom după ce userul face click pe hartă
+  leafletMap.on('focus', () => leafletMap.scrollWheelZoom.enable());
+  leafletMap.on('blur', () => leafletMap.scrollWheelZoom.disable());
+
+  // Tile layer CartoDB Voyager (gratuit, fără API key, fără restricții Referer)
+  // Bazat pe date OpenStreetMap, dar servit prin CDN-ul CartoDB
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    subdomains: 'abcd',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>'
+  }).addTo(leafletMap);
+
+  // Icon personalizat verde, în tonul site-ului
+  const customIcon = L.divIcon({
+    className: 'custom-pin',
+    html: `
+      <div class="custom-pin-wrap">
+        <div class="custom-pin-circle">📍</div>
+        <div class="custom-pin-tail"></div>
+      </div>
+    `,
+    iconSize: [36, 46],
+    iconAnchor: [18, 46],
+    popupAnchor: [0, -46]
+  });
+
+  // Adaugă marker pentru fiecare locație
+  const markers = [];
+  locations.forEach((loc) => {
+    const popupContent = `
+      <h4>${loc.name}</h4>
+      <p>📍 ${loc.sector}</p>
+      <p>🕐 ${loc.program}</p>
+      <p>🥗 ${loc.produse}</p>
+    `;
+    const marker = L.marker([loc.lat, loc.lng], { icon: customIcon })
+      .addTo(leafletMap)
+      .bindPopup(popupContent, { maxWidth: 280, minWidth: 220 });
+    markers.push(marker);
+  });
+
+  // Ajustează viewul ca să cuprindă toate locațiile
+  if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    leafletMap.fitBounds(group.getBounds(), { padding: [40, 40] });
+  }
+
+  // Asigură-te că harta calculează corect dimensiunile (fix pentru cazurile
+  // când containerul nu e complet pregătit la momentul inițializării)
+  setTimeout(() => leafletMap.invalidateSize(), 100);
+}
+
+function renderLocations() {
+  const list = document.getElementById('locationsList');
+  list.innerHTML = locations.map((loc, i) => `
+    <div class="location-item" onclick="focusLocation(${i})" style="cursor:pointer;">
+      <div class="location-pin">📍</div>
+      <div>
+        <h4>${loc.name}</h4>
+        <p>${loc.sector} · ${loc.program}</p>
+        <p style="margin-top:2px;">${loc.produse}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Click pe un card din listă → centrează harta și deschide popup-ul
+function focusLocation(idx) {
+  if (!leafletMap) return;
+  const loc = locations[idx];
+  leafletMap.setView([loc.lat, loc.lng], 15, { animate: true });
+  // Găsește marker-ul corespunzător și deschide popup-ul
+  leafletMap.eachLayer(layer => {
+    if (layer instanceof L.Marker) {
+      const ll = layer.getLatLng();
+      if (Math.abs(ll.lat - loc.lat) < 1e-6 && Math.abs(ll.lng - loc.lng) < 1e-6) {
+        layer.openPopup();
+      }
+    }
+  });
+  // Scroll smooth către hartă pe mobil
+  document.getElementById('map-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Inițializare după DOM
+window.addEventListener('load', () => {
+  initMap();
+  renderLocations();
+});
+
+// ─── FORMULARE ───
+function submitContact(e) {
+  e.preventDefault();
+  document.getElementById('contactSuccess').style.display = 'block';
+  e.target.reset();
+  setTimeout(() => { document.getElementById('contactSuccess').style.display = 'none'; }, 5000);
+}
+
+function submitPartner(e) {
+  e.preventDefault();
+  document.getElementById('partnerSuccess').style.display = 'block';
+  e.target.reset();
+  setTimeout(() => { document.getElementById('partnerSuccess').style.display = 'none'; }, 5000);
+}
+
+// ─── HAMBURGER ───
+function toggleMenu() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+// Smooth close nav on link click (mobile)
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+</script>
+</body>
+</html>
